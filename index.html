@@ -1,0 +1,156 @@
+<!-- Port number 8080 used in LocalHost -->
+
+<!--   Name: Sonam Rinzin Gurung
+       ID: 2059524                -->
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Application Prototype2</title>
+
+  <style media="screen">
+  body
+  {
+    background-color : #eb6e4b;
+  }
+
+  #weatherInfo
+  {
+    position:absolute;
+    background-color: white;
+    width:500px; border: 3px solid orange; border-radius: 25px;
+    padding: 10px 70px 20px 70px ;
+    margin: 100px 0px 20px 400px;
+  }
+  #city
+  {
+    font-variant: small-caps;
+    color: #eb6e4b ; font-size: 80px; font-family:monospace; font-weight: 900;
+  }
+
+  #temperature
+  {
+
+    color: rgb(72,72,74);
+    font-size: 50px;
+    position: absolute;
+    top: 120px; left:170px;
+  }
+  #weather_main
+  {
+    color: rgb(72,72,74); font-size: 30px;
+    position: absolute;
+    top: 190px;
+
+  }
+  #feelslike
+  {
+    color: rgb(72,72,74); font-size: 25px;
+  }
+  #description
+  {
+    color: rgb(72,72,74); font-size: 25px;
+    text-transform: capitalize;
+  }
+  #moreInfo
+  {
+    font-family: monospace;
+    color: rgb(72,72,74); font-size: 20px;
+  }
+  </style>
+
+</head>
+
+<body>
+<!-- data retrived from the API or Browser Cache is displayed in these placeholders-->
+  <div id="weatherInfo">
+
+    <b id="city"> </b>
+    <br>
+    <b id = 'icon'></b>
+    <br>
+    <b id="temperature"> </b>
+    <br>
+    <b id="weather_main"> </b>
+    <br>
+    <b id="feelslike">Feels Like: <span id="feels"></span> | </b>
+    <b id="description"> </b>
+    <br>
+    <p id = "moreInfo">
+      <b>Humidity: </b> <span id ="humidity"></span> &nbsp
+      <b>Pressure: </b> <span id = "pressure"></span> <br>
+      <b>Wind Speed: </b> <span id="speed"></span> <br>
+      <b>Wind Degree: </b> <span id = "degree"> </span><br><br>
+    </p>
+    <b>Last Updated :</b> <span id ="myLastUpdated"></span>
+  </div>
+</body>
+
+
+<script type="text/javascript">
+
+//checks if the data in browser cache (local storage) is older than 300000 milliseconds i.e. 5 minutes
+
+if (localStorage.when != null && parseInt(localStorage.when)+300000 > Date.now()){
+  let lastUpdated = Math.round((Date.now()-localStorage.when)/1000)+ " second(s)";
+
+//The data on the HTML page is displayed from the browser data
+
+  document.getElementById ("city").innerHTML = localStorage.city;
+  document.getElementById("temperature").innerHTML = localStorage.temperature + '° C';
+  document.getElementById("weather_main").innerHTML = localStorage.weather_main;
+  document.getElementById("feels").innerHTML = localStorage.feels + '° C';
+  document.getElementById("description").innerHTML = localStorage.description;
+
+  document.getElementById("humidity").innerHTML = localStorage.humidity + ' %';
+  document.getElementById("pressure").innerHTML = localStorage.pressure + ' hPa';
+  document.getElementById("speed").innerHTML = localStorage.wind_speed + ' m/s';
+  document.getElementById("degree").innerHTML = localStorage.wind_degree + '°';
+  document.getElementById("icon").innerHTML = `<img src="http://openweathermap.org/img/wn/${localStorage.icon_code}@2x.png" id='iconWeather'>`
+  document.getElementById("myLastUpdated").innerHTML = lastUpdated;
+}
+// if data in browser cache is older than 5 minutes, fresh data from the PHP API is fetched
+else{
+  // using URL of local server with port number 8080
+  fetch('http://localhost:8080/database_connect.php').then(function(response){
+    return response.json()
+
+  }).then(function(response){
+    document.getElementById ("city").innerHTML = response.city;
+    document.getElementById("temperature").innerHTML = response.temperature + '° C';
+    document.getElementById("weather_main").innerHTML = response.weather_main;
+    document.getElementById("feels").innerHTML = response.feels + '° C';
+    document.getElementById("description").innerHTML = response.description;
+
+    document.getElementById("humidity").innerHTML = response.humidity + ' %';
+    document.getElementById("pressure").innerHTML = response.pressure + ' hPa';
+    document.getElementById("speed").innerHTML = response.wind_speed + ' m/s';
+    document.getElementById("degree").innerHTML = response.wind_degree + '°';
+    document.getElementById("icon").innerHTML = `<img src="http://openweathermap.org/img/wn/${response.icon_code}@2x.png" id='iconWeather'>`
+
+    // the fresh data is stored in the browser cache (local storage)
+    localStorage.city = response.city;
+    localStorage.temperature = response.temperature;
+    localStorage.weather_main = response.weather_main;
+    localStorage.feels = response.feels;
+    localStorage.description = response.description;
+    localStorage.humidity = response.humidity;
+    localStorage.pressure = response.pressure;
+    localStorage.wind_speed = response.wind_speed;
+    localStorage.wind_degree = response.wind_degree;
+    localStorage.icon_code = response.icon_code;
+    localStorage.when = Date.now();
+
+
+  }).catch(err=> {
+
+    console.log(err);
+  });
+}
+</script>
+
+</html>
